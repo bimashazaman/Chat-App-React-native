@@ -6,8 +6,12 @@ import { KeyboardAvoidingView } from "react-native";
 import { auth } from "../firebase";
 
 const LoginScreen = ({ navigation }) => {
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+
+
+  
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((authUser) => {
@@ -19,7 +23,9 @@ const LoginScreen = ({ navigation }) => {
   }), [];
 
   const SignIn = () => {
-    console.log(email, password);
+    auth
+      .signInWithEmailAndPassword(email, password)
+      .catch((error) => alert(error.message));
   };
 
   return (
