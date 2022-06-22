@@ -3,6 +3,7 @@ import React, { useLayoutEffect } from "react";
 import { KeyboardAvoidingView } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import { Button, Input, Image } from "react-native-elements";
+import { auth } from "../firebase";
 
 const RegisterScreen = ({ navigation }) => {
   const [email, setEmail] = React.useState("");
@@ -12,14 +13,23 @@ const RegisterScreen = ({ navigation }) => {
 
   useLayoutEffect(() => {
     navigation.setOptions({
-       HeaderBackTitle: "Back to Login",
+      HeaderBackTitle: "Back to Login",
     });
-    }, [navigation]);
-
+  }, [navigation]);
 
   const RegisterHandler = () => {
-    console.log(email, password, name, imageUrl);
-    }
+    auth
+      .createUserWithEmailAndPassword(email, password)
+      .then((authUser) => {
+        return authUser.user.updateProfile({
+          displayName: name,
+          photoURL: imageUrl || "https://i.imgur.com/avatar.png",
+        });
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  };
 
   return (
     <KeyboardAvoidingView behaviour="padding" style={styles.container}>
@@ -54,19 +64,18 @@ const RegisterScreen = ({ navigation }) => {
           placeholder="Profile pic Url"
           type="text"
           value={imageUrl}
-            onChangeText={(text) => setImageURL(text)}
-            onSubmitEditing={RegisterHandler}
+          onChangeText={(text) => setImageURL(text)}
+          onSubmitEditing={RegisterHandler}
         />
       </View>
 
-        <Button 
+      <Button
         raised
         onPress={RegisterHandler}
         containerStyle={styles.button}
         title="Register"
         type="outline"
-        />
-
+      />
     </KeyboardAvoidingView>
   );
 };
@@ -74,18 +83,18 @@ const RegisterScreen = ({ navigation }) => {
 export default RegisterScreen;
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        alignItems: "center",
-        justifyContent: "center",
-        backgroundColor: "#fff",
-        padding: 10,
-      },
-      InpurContainer: {
-        width: 300,
-      },
-      button: {
-        marginTop: 10,
-        width: 200,
-      },
+  container: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#fff",
+    padding: 10,
+  },
+  InpurContainer: {
+    width: 300,
+  },
+  button: {
+    marginTop: 10,
+    width: 200,
+  },
 });
