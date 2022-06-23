@@ -1,14 +1,33 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { StyleSheet, Text, View } from "react-native";
 import { ListItem, Avatar } from "react-native-elements";
+import { db } from "../firebase";
 
 const CustomListItem = ({ id, chatName, enterChat }) => {
+
+  const [chatMessages, setChatMessages] = useState([]);
+
+  useEffect(() => {
+    const unsubscribe = db
+      .collection("chats")
+      .doc(id)
+      .collection("messages")
+      .orderBy("timestamp", "desc")
+      .onSnapshot((snapshot) =>
+        setChatMessages(
+          snapshot.docs.map((doc) => doc.data())
+        )
+      );
+    return unsubscribe;
+  });
+
   return (
-    <ListItem onPress={() => enterChat(id, chatName)} key={id} bottomDivider >
+    <ListItem onPress={() => enterChat(id, chatName)} key={id} bottomDivider>
       <Avatar
         rounded
         source={{
-          uri: "https://bimasha.com/assets/images/about-banner.png",
+          uri: chatMessages[0]?.user?.photoURL ||
+           "https://bimasha.com/assets/images/about-banner.png",
         }}
       />
       <ListItem.Content>
@@ -17,10 +36,11 @@ const CustomListItem = ({ id, chatName, enterChat }) => {
             fontWeight: 800,
           }}
         >
-          { chatName }
+          {chatName}
         </ListItem.Title>
         <ListItem.Subtitle numberOfLines={1} ellipsizeMode="tail">
-          hfgngf
+          { chatMessages[0]?.displayName}: {chatMessages[0]?.message}
+         
         </ListItem.Subtitle>
       </ListItem.Content>
     </ListItem>
