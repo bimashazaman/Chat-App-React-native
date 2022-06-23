@@ -27,7 +27,7 @@ const RegisterScreen = ({ navigation }) => {
         });
       })
       .catch((error) => {
-        console.log(error);
+        <Text>{error.message}</Text>;
       });
   };
 

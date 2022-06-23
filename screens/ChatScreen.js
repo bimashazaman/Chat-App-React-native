@@ -64,20 +64,22 @@ const ChatScreen = ({ navigation, route }) => {
         </View>
       ),
     });
-  }, [navigation]);
+  }, [navigation, messages]);
 
   useLayoutEffect(() => {
     const unsubscribe = db
       .collection("chats")
       .doc(route.params.id)
       .collection("messages")
-      .orderBy("timestamp", "desc")
-      .onSnapshot((snapshot) => setMessages(
+      .orderBy("timestamp", "asc")
+      .onSnapshot((snapshot) =>
+        setMessages(
           snapshot.docs.map((doc) => ({
             id: doc.id,
             data: doc.data(),
           }))
-        ));
+        )
+      );
     return unsubscribe;
   }, [route]);
 
@@ -91,7 +93,29 @@ const ChatScreen = ({ navigation, route }) => {
       <StatusBar style="light" />
       <KeyboardAvoidingView behavior="padding" style={styles.container}>
         <>
-          <ScrollView></ScrollView>
+          <ScrollView>
+            {messages.map(({ id, data }) =>
+              data.email === auth.currentUser.email ? (
+                <>
+                  <View key={id} style={styles.reciever}>
+                    <Text style={styles.receiverText}>{data.message}</Text>
+                  </View>
+                </>
+              ) : (
+                <View key={id} style={styles.sender}>
+                  {/* <Avatar
+                    rounded
+                    source={{ uri: data.photoURL }}
+                    size={30}
+                    left={-5}
+                    bottom={-10}
+                    position="absolute"
+                  /> */}
+                  <Text style={styles.senderText}>{data.message}</Text>
+                </View>
+              )
+            )}
+          </ScrollView>
           <View style={styles.footer}>
             <TextInput
               onSubmitEditing={send}
@@ -164,4 +188,52 @@ const styles = StyleSheet.create({
     padding: 10,
     bottom: 0,
   },
+  reciever: {
+    flexDirection: "row",
+    padding: 10,
+    backgroundColor: "white",
+    alignSelf: "flex-end",
+    justifyContent: "flex-end",
+    borderRadius: 25,
+    marginRight: 15,
+    marginLeft: 15,
+    marginTop: 10,
+    maxWidth: "80%",
+    position: "relative",
+    shadowOffset: {
+      width: 2,
+      height: 3,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+  },
+
+  sender: {
+    flexDirection: "row",
+    padding: 10,
+    backgroundColor: "#1F51FF",
+    alignSelf: "flex-start",
+    justifyContent: "flex-start",
+    borderRadius: 25,
+    marginRight: 15,
+    marginLeft: 15,
+    marginTop: 10,
+    maxWidth: "80%",
+    position: "relative",
+  },
+  receiverText: {
+    color: "black",
+    fontSize: 15,
+    fontWeight: "bold",
+    marginLeft: 10,
+    marginRight: 10,
+  },
+  senderText: {
+    color: "white",
+    fontSize: 15,
+    fontWeight: "bold",
+    marginLeft: 10,
+    marginRight: 10,
+  },
+
 });
